@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ethereum Whale Alert</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:#0f1115;
+  color:#ffffff;
+  font-family:Inter, Arial, sans-serif;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:40px 24px;
+}
+h1 {
+  font-size:22px;
+  color:#3ddc84;
+  margin-bottom:8px;
+  letter-spacing:1px;
+}
+.subtitle {
+  font-size:13px;
+  color:#7f8798;
+  margin-bottom:32px;
+}
+.stats {
+  display:flex;
+  gap:16px;
+  margin-bottom:32px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.stat {
+  background:#171a20;
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:14px;
+  padding:16px 24px;
+  text-align:center;
+  min-width:120px;
+}
+.stat .value { font-size:26px; font-weight:700; color:#3ddc84; }
+.stat .label { font-size:11px; color:#7f8798; margin-top:4px; text-transform:uppercase; letter-spacing:1px; }
+.container { width:100%; max-width:480px; }
+.alert-card {
+  background:#171a20;
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:22px;
+  padding:28px;
+  margin-bottom:16px;
+  animation:fade .35s ease;
+}
+.alert-card.high { border-left:4px solid #e53935; }
+.alert-card.medium { border-left:4px solid #fbc02d; }
+.alert-card.low { border-left:4px solid #3ddc84; }
+@keyframes fade {
+  from { opacity:0; transform:translateY(8px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.alert-label {
+  font-size:12px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:#8b93a7;
+  margin-bottom:14px;
+}
+.amount {
+  font-size:36px;
+  font-weight:700;
+  line-height:1;
+  margin-bottom:12px;
+  color:#ffffff;
+}
+.amount.high { color:#e53935; }
+.amount.medium { color:#fbc02d; }
+.amount.low { color:#3ddc84; }
+.detail {
+  font-size:13px;
+  color:#7f8798;
+  margin-bottom:6px;
+  word-break:break-all;
+}
+.detail span { color:#c7cfdd; }
+.hash-link {
+  color:#3ddc84;
+  text-decoration:none;
+  font-size:12px;
+  font-family:monospace;
+}
+.hash-link:hover { text-decoration:underline; }
+.live {
+  margin-top:16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  color:#7f8798;
+}
+.dot {
+  width:8px; height:8px;
+  border-radius:50%;
+  background:#3ddc84;
+  animation:pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0% { opacity:0.4; transform:scale(1); }
+  50% { opacity:1; transform:scale(1.3); }
+  100% { opacity:0.4; transform:scale(1); }
+}
+.empty {
+  text-align:center;
+  color:#555;
+  padding:60px;
+  font-size:14px;
+}
+</style>
+</head>
+<body>
+
+<h1>🐋 Ethereum Whale Alert</h1>
+<p class="subtitle">Real-time monitoring of large ETH transactions</p>
+
+<div class="stats">
+  <div class="stat">
+    <div class="value" id="total-count">0</div>
+    <div class="label">Detected</div>
+  </div>
+  <div class="stat">
+    <div class="value" id="total-eth">0</div>
+    <div class="label">Total ETH</div>
+  </div>
+  <div class="stat">
+    <div class="value" id="largest">0</div>
+    <div class="label">Largest</div>
+  </div>
+</div>
+
+<div class="container" id="alerts">
+  <div class="empty">⏳ Waiting for whale transactions...</div>
+</div>
+
+<script>
+async function fetchAlerts() {
+  try {
+    const res = await fetch("/alerts");
+    const data = await res.json();
+
+    document.getElementById("total-count").innerText = data.length;
+
+    if (data.length > 0) {
+      const totalEth = data.reduce((s, a) => s + a.value_eth, 0);
+      const largest  = Math.max(...data.map(a => a.value_eth));
+      document.getElementById("total-eth").innerText = totalEth.toFixed(0);
+      document.getElementById("largest").innerText   = largest.toFixed(0);
+
+      document.getElementById("alerts").innerHTML = data.map(alert => {
+        const level     = alert.value_eth >= 1000 ? "high" : alert.value_eth >= 500 ? "medium" : "low";
+        const shortHash = alert.hash.slice(0,10) + "..." + alert.hash.slice(-8);
+        return `
+          <div class="alert-card ${level}">
+            <div class="alert-label">🐋 Whale Transaction · Block #${alert.block}</div>
+            <div class="amount ${level}">${alert.value_eth.toFixed(2)} ETH</div>
+            <div class="detail">From <span>${alert.from}</span></div>
+            <div class="detail">To <span>${alert.to || "Contract Creation"}</span></div>
+            <div class="detail">
+              Tx <a class="hash-link" href="https://etherscan.io/tx/${alert.hash}" target="_blank">${shortHash} ↗</a>
+            </div>
+            <div class="live"><div class="dot"></div>Live on Ethereum Mainnet</div>
+          </div>
+        `;
+      }).join("");
+    }
+  } catch(e) { console.error(e); }
+}
+
+fetchAlerts();
+setInterval(fetchAlerts, 15000);
+</script>
+</body>
+</html>
