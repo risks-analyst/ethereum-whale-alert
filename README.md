@@ -11,8 +11,8 @@ Real-time Ethereum whale transaction monitor. Detects large ETH movements on-cha
 
 [![Ethereum Whale Alert Demo](https://img.youtube.com/vi/LF6v4rugDU0/0.jpg)](https://youtu.be/LF6v4rugDU0)
 
-🔗 **Live Demo:** Coming soon
-
+🔗 **Live Demo:** [https://ethereum-whale-alert.onrender.com](https://ethereum-whale-alert.onrender.com)
+ 
 ## Problem
 
 Large ETH movements often signal market-moving events — exchange withdrawals, whale accumulation, or liquidations. There is no simple tool that monitors these in real time without requiring complex infrastructure.
