@@ -4,9 +4,14 @@
 ![Flask](https://img.shields.io/badge/Flask-3.x-green)
 ![Web3](https://img.shields.io/badge/Web3.py-7.x-orange)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
+
 ![Preview](assets/preview.png)
 
 Real-time Ethereum whale transaction monitor. Detects large ETH movements on-chain and displays them live with Telegram alert support.
+
+## Problem
+
+
 
 ## Demo
 
@@ -98,10 +103,10 @@ Open `http://localhost:5001`
 
 ## Challenges & Learnings
 
- - Managing real-time block scanning in a background thread without blocking Flask
-- Keeping the UI updated without WebSockets using efficient polling
-- Filtering meaningful whale activity from high-frequency low-value transactions
-- Handling RPC connection errors gracefully without crashing the monitor
+- **Real-Time Block Concurrency:** Designed a multi-threaded background monitor that scans new blocks safely without blocking the Flask server's main process loop or interrupting API requests.
+- **Optimized UI Data Polling:** Developed a clean, responsive analytics interface that tracks real-time data states natively every 15 seconds, eliminating the setup complexity and overhead of WebSockets for free tier containers.
+- **Slicing Blockchain Noise:** Implemented data filtering structures to extract meaningful transactional volatility patterns while parsing through blocks that contain thousands of low-value transfers.
+
 
 ## Roadmap
 
